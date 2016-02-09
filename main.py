@@ -1,8 +1,7 @@
 # _*_coding:utf-8_*_
 
-import pprint
 import sys
-import csv
+import pandas as pd
 import logging
 from pyquery import PyQuery as pq
 
@@ -48,26 +47,33 @@ def scraper(page_url):
     links = []
     for shop_name in dom("li.shop_name a"):
         query = pq(shop_name)
-        names.append(query.text())
-        links.append(query.attr("href"))
+        names.append(query.text().encode("utf-8"))
+        links.append("http://www.fashion-press.net" + query.attr("href"))
 
     # 住所一覧取得
     addresses = []
     for address in dom(".shop_info").items():
-        addresses.append(address.text().lstrip(u"住所:"))
+        addresses.append(address.text().lstrip(u"住所 : ").encode("utf-8"))
 
     # ループでくっつける
     for name, link, address in zip(names, links, addresses):
         logging.debug("-----------------------")
-        logging.debug("NAME: {}".format(name.encode("utf-8")))
-        logging.debug("ADDRESS: {}".format(address.encode("utf-8")))
-        logging.debug("LINK: {}".format(link.encode("utf-8")))
+        logging.debug("NAME: {}".format(name))
+        logging.debug("ADDRESS: {}".format(address))
+        logging.debug("LINK: {}".format(link))
         logging.debug("-----------------------")
         shop_list.append({"name": name,
                           "link": link,
                           "address": address,
                           })
     return shop_list
+
+
+def generate_shop_csv(shop_list):
+    logging.info("CSVファイルを作成します")
+    data = pd.DataFrame(shop_list)
+    data.to_csv("result.csv")
+    logging.info("CSVファイルを作成しました")
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
@@ -87,4 +93,6 @@ if __name__ == "__main__":
 
     url = "http://www.fashion-press.net/shops/pref_{pref_num}/".format(
                                                             pref_num=pref_num)
-    pprint.pprint(crawler(url))
+
+    generate_shop_csv(crawler(url))
+

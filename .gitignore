@@ -91,3 +91,4 @@ Session.vim
 
 
 .env
+*.csv
