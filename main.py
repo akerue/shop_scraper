@@ -76,7 +76,7 @@ def generate_shop_csv(shop_list):
     logging.info("CSVファイルを作成しました")
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
 
     params = sys.argv
 
