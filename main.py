@@ -1,6 +1,6 @@
 # _*_coding:utf-8_*_
 
-import sys
+import os, sys
 import pandas as pd
 import logging
 from pyquery import PyQuery as pq
@@ -69,10 +69,11 @@ def scraper(page_url):
     return shop_list
 
 
-def generate_shop_csv(shop_list):
+def generate_shop_csv(shop_list, pref_num):
     logging.info("CSVファイルを作成します")
     data = pd.DataFrame(shop_list)
-    data.to_csv("result.csv")
+    file_name = "result_pref_{}.csv".format(pref_num)
+    data.to_csv(os.path.join("result", file_name))
     logging.info("CSVファイルを作成しました")
 
 if __name__ == "__main__":
@@ -82,17 +83,19 @@ if __name__ == "__main__":
 
     # 簡単に引数チェック
     try:
-        pref_num = params[1]
-        assert(0 < int(pref_num) and int(pref_num) < 48)
+        pref_num_list = params[1:]
+        for pref_num in pref_num_list:
+            assert(0 < int(pref_num) and int(pref_num) < 48)
     except Exception, e:
         print "---------USAGE--------"
-        print "python main.py [pref_num]"
+        print "python main.py [pref_num_list*]"
         print "pref_num: from 1 to 47"
         print "----------------------"
         raise(e)
 
-    url = "http://www.fashion-press.net/shops/pref_{pref_num}/".format(
+    for pref_num in pref_num_list:
+        logging.info("県番号が{}のショップをスクレーピングします".format(pref_num))
+        url = "http://www.fashion-press.net/shops/pref_{pref_num}/".format(
                                                             pref_num=pref_num)
 
-    generate_shop_csv(crawler(url))
-
+        generate_shop_csv(crawler(url), pref_num)
